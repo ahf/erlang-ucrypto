@@ -5,3 +5,5 @@
 deps/*
 ebin
 priv/*
+
+README.html
