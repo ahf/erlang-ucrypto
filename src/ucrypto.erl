@@ -28,6 +28,10 @@
 
 -on_load(init/0).
 
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+-endif.
+
 %%
 %% NIF's.
 %%
@@ -79,3 +83,32 @@ ripemd160_nif(_Data) -> ?nif_stub.
 ripemd160_init_nif() -> ?nif_stub.
 ripemd160_update_nif(_Context, _Data) -> ?nif_stub.
 ripemd160_final_nif(_Context) -> ?nif_stub.
+
+%%
+%% Tests.
+%%
+-ifdef(TEST).
+
+hex2bin([A, B | Rest]) ->
+    <<(list_to_integer([A, B], 16)), (hex2bin(Rest))/binary>>;
+hex2bin([A]) ->
+    <<(list_to_integer([A], 16))>>;
+hex2bin([]) ->
+    <<>>.
+
+hex2bin_test() ->
+    [
+        ?assertEqual(hex2bin(""), <<>>),
+        ?assertEqual(hex2bin("0"), <<0>>),
+        ?assertEqual(hex2bin("00"), <<0>>),
+        ?assertEqual(hex2bin("F"), <<15>>),
+        ?assertEqual(hex2bin("0F"), <<15>>),
+        ?assertEqual(hex2bin("F0"), <<240>>),
+        ?assertEqual(hex2bin("FF"), <<255>>),
+        ?assertEqual(hex2bin("FFFF"), <<255,255>>),
+        ?assertEqual(hex2bin("000"), <<0,0>>),
+        ?assertEqual(hex2bin("0001"), <<0,1>>),
+        ?assertEqual(hex2bin("FFFFFFFF"), <<255,255,255,255>>)
+    ].
+
+-endif.
