@@ -63,19 +63,18 @@ init() ->
 %% RIPEMD160.
 %%
 -spec ripemd160(iodata()) -> binary().
--spec ripemd160_init() -> binary().
--spec ripemd160_update(binary(), iodata()) -> binary().
--spec ripemd160_final(binary()) -> binary().
-
 ripemd160(Data) ->
     ripemd160_nif(Data).
 
+-spec ripemd160_init() -> binary().
 ripemd160_init() ->
     ripemd160_init_nif().
 
+-spec ripemd160_update(binary(), iodata()) -> binary().
 ripemd160_update(Context, Data) ->
     ripemd160_update_nif(Context, Data).
 
+-spec ripemd160_final(binary()) -> binary().
 ripemd160_final(Context) ->
     ripemd160_final_nif(Context).
 
