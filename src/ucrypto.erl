@@ -111,4 +111,17 @@ hex2bin_test() ->
         ?assertEqual(hex2bin("FFFFFFFF"), <<255,255,255,255>>)
     ].
 
+ripemd160_simple_test() ->
+    [
+        ?assertEqual(hex2bin("9c1185a5c5e9fc54612808977ee8f548b2258d31"), ripemd160("")),
+        ?assertEqual(hex2bin("ddadef707ba62c166051b9e3cd0294c27515f2bc"), ripemd160("A")),
+        ?assertEqual(hex2bin("5d74fef3f73507f0e8a8ff9ec8cdd88988c472ca"), ripemd160("abcdefghijklmnopqrstuvwxyzæøå"))
+    ].
+
+ripemd160_test() ->
+    List = ["abc", "def", "gh", "ijkl", "mno", "pqrs", "tuvwx", "yzæøå"],
+    InitialContext = ripemd160_init(),
+    FinalContext = lists:foldl(fun(X, Context) -> ripemd160_update(Context, X) end, InitialContext, List),
+    ?assertEqual(hex2bin("5d74fef3f73507f0e8a8ff9ec8cdd88988c472ca"), ripemd160_final(FinalContext)).
+
 -endif.
