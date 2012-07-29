@@ -1,0 +1,7 @@
+*.beam
+*.o
+
+.eunit/*
+deps/*
+ebin
+priv/*
