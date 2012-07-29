@@ -44,7 +44,6 @@ nif_stub_error(Line) ->
 %% Init.
 %%
 -spec init() -> ok | {error, any()}.
-
 init() ->
     File = case code:priv_dir(?MODULE) of
         {error, bad_name} ->
@@ -78,10 +77,17 @@ ripemd160_update(Context, Data) ->
 ripemd160_final(Context) ->
     ripemd160_final_nif(Context).
 
-ripemd160_nif(_Data) -> ?nif_stub.
-ripemd160_init_nif() -> ?nif_stub.
-ripemd160_update_nif(_Context, _Data) -> ?nif_stub.
-ripemd160_final_nif(_Context) -> ?nif_stub.
+ripemd160_nif(_Data) ->
+    ?nif_stub.
+
+ripemd160_init_nif() ->
+    ?nif_stub.
+
+ripemd160_update_nif(_Context, _Data) ->
+    ?nif_stub.
+
+ripemd160_final_nif(_Context) ->
+    ?nif_stub.
 
 %%
 %% Tests.
