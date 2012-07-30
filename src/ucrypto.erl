@@ -25,6 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
+-export([ec_new/1, ec_generate_key/1, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
 
 -on_load(init/0).
 
@@ -87,6 +88,57 @@ ripemd160_update_nif(_Context, _Data) ->
     ?nif_stub.
 
 ripemd160_final_nif(_Context) ->
+    ?nif_stub.
+
+%%
+%% EC.
+%%
+ec_new(Curve) when is_atom(Curve) ->
+    ec_new_by_curve_nif(Curve).
+
+ec_generate_key({ec_key, KeyRef}) ->
+    ec_generate_key_nif(KeyRef).
+
+ec_verify({ec_key, KeyRef}, Data, Signature) ->
+    ec_verify_nif(KeyRef, Data, Signature).
+
+ec_sign({ec_key, KeyRef}, Data) ->
+    ec_sign_nif(KeyRef, Data).
+
+ec_public_key({ec_key, KeyRef}) ->
+    ec_get_public_key_nif(KeyRef).
+
+ec_set_public_key({ec_key, KeyRef}, PublicKey) ->
+    ec_set_public_key_nif(KeyRef, PublicKey).
+
+ec_private_key({ec_key, KeyRef}) ->
+    ec_get_private_key_nif(KeyRef).
+
+ec_set_private_key({ec_key, KeyRef}, PrivateKey) ->
+    ec_set_private_key_nif(KeyRef, PrivateKey).
+
+ec_new_by_curve_nif(_Curve) ->
+    ?nif_stub.
+
+ec_generate_key_nif(_Key) ->
+    ?nif_stub.
+
+ec_verify_nif(_Key, _Data, _Signature) ->
+    ?nif_stub.
+
+ec_sign_nif(_Key, _Data) ->
+    ?nif_stub.
+
+ec_get_public_key_nif(_Key) ->
+    ?nif_stub.
+
+ec_set_public_key_nif(_Key, _PublicKey) ->
+    ?nif_stub.
+
+ec_get_private_key_nif(_Key) ->
+    ?nif_stub.
+
+ec_set_private_key_nif(_Key, _PrivateKey) ->
     ?nif_stub.
 
 %%

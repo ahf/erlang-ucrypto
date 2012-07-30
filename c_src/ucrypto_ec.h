@@ -26,34 +26,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GUARD_UCRYPTO_EC_H
+#define GUARD_UCRYPTO_EC_H 1
+
 #include "ucrypto.h"
-#include "ucrypto_ec.h"
-#include "ucrypto_ripemd160.h"
 
-static ErlNifFunc nif_functions[] = {
-    /* RIPEMD160 */
-    {"ripemd160_nif", 1, ucrypto_ripemd160_nif},
-    {"ripemd160_init_nif", 0, ucrypto_ripemd160_init_nif},
-    {"ripemd160_update_nif", 2, ucrypto_ripemd160_update_nif},
-    {"ripemd160_final_nif", 1, ucrypto_ripemd160_final_nif},
+int ucrypto_ec_on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 
-    /* EC */
-    {"ec_new_by_curve_nif", 1, ucrypto_ec_new_by_curve_nif},
-    {"ec_generate_key_nif", 1, ucrypto_ec_generate_key_nif},
-    {"ec_verify_nif", 3, ucrypto_ec_verify_nif},
-    {"ec_sign_nif", 2, ucrypto_ec_sign_nif},
-    {"ec_get_public_key_nif", 1, ucrypto_ec_get_public_key_nif},
-    {"ec_set_public_key_nif", 2, ucrypto_ec_set_public_key_nif},
-    {"ec_get_private_key_nif", 1, ucrypto_ec_get_private_key_nif},
-    {"ec_set_private_key_nif", 2, ucrypto_ec_set_private_key_nif}
-};
+ERL_NIF_TERM ucrypto_ec_new_by_curve_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_generate_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_verify_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_sign_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_get_public_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_set_public_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_get_private_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_set_private_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
-static int on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
-{
-    if (0 != ucrypto_ec_on_load(env, priv_data, load_info))
-        return 1;
-
-    return 0;
-}
-
-ERL_NIF_INIT(ucrypto, nif_functions, on_load, /* reload */ NULL, /* upgrade */ NULL, /* unload */ NULL);
+#endif

@@ -29,7 +29,7 @@
 #ifndef GUARD_UCRYPTO_RIPEMD160_H
 #define GUARD_UCRYPTO_RIPEMD160_H 1
 
-#include "erl_nif.h"
+#include "ucrypto.h"
 
 ERL_NIF_TERM ucrypto_ripemd160_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM ucrypto_ripemd160_init_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]);

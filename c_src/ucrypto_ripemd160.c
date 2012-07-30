@@ -26,11 +26,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ucrypto.h"
 #include "ucrypto_ripemd160.h"
 
 #include <string.h>
 #include <openssl/ripemd.h>
-#include "erl_nif.h"
 
 static const int ripemd160_length = 160 / 8;
 
