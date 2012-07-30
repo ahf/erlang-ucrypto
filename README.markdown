@@ -11,7 +11,7 @@ modules lacks certain features that would be nice to have in your applications.
 Code Examples
 -------------
 
-### RIPEMD160 Hash Function
+### RIPEMD 160
 
 ```erl
 1> c(ucrypto).
@@ -28,6 +28,36 @@ Code Examples
 <<127,119,38,71,216,135,80,173,216,45,142,26,122,62,92,9,2,163,70,163>>
 7> ucrypto:ripemd160("Hello world!") == ucrypto:ripemd160_final(Context3).
 true
+```
+
+### Utilities
+
+#### `hex2bin`
+
+```erl
+1> c(ucrypto).
+{ok,ucrypto}
+2> ucrypto:hex2bin("FFFFFF").
+<<"ÿÿÿ">>
+3> ucrypto:hex2bin("000f").  
+<<0,15>>
+4> ucrypto:hex2bin("000fff").
+<<0,15,255>>
+```
+
+#### `bin2hex`
+
+```erl
+1> c(ucrypto).
+{ok,ucrypto}
+2> ucrypto:bin2hex(<<255,255,255>>).
+"FFFFFF"
+3> ucrypto:bin2hex(<<255,255,0>>).  
+"FFFF00"
+4> ucrypto:bin2hex(<<255,255,0,127,1>>).
+"FFFF007F01"
+5> ucrypto:hex2bin("FFFF007F01").
+<<255,255,0,127,1>>
 ```
 
 Authors
