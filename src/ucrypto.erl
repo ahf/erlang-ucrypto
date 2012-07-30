@@ -25,7 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_get_public_key/1, ec_set_public_key/2, ec_get_private_key/1, ec_set_private_key/2]).
+-export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_get_public_key/1, ec_set_public_key/2, ec_get_private_key/1, ec_set_private_key/2, ec_delete_key/1]).
 -export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
@@ -144,6 +144,9 @@ ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
             {error, {failed_to_set_private_key, PrivateKey}}
     end.
 
+ec_delete_key({ec_key, KeyRef}) ->
+    ec_delete_key_nif(KeyRef).
+
 ec_new_by_curve_nif(_Curve) ->
     ?nif_stub.
 
@@ -166,6 +169,9 @@ ec_get_private_key_nif(_Key) ->
     ?nif_stub.
 
 ec_set_private_key_nif(_Key, _PrivateKey) ->
+    ?nif_stub.
+
+ec_delete_key_nif(_Key) ->
     ?nif_stub.
 
 %%

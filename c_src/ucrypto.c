@@ -45,7 +45,8 @@ static ErlNifFunc nif_functions[] = {
     {"ec_get_public_key_nif", 1, ucrypto_ec_get_public_key_nif},
     {"ec_set_public_key_nif", 2, ucrypto_ec_set_public_key_nif},
     {"ec_get_private_key_nif", 1, ucrypto_ec_get_private_key_nif},
-    {"ec_set_private_key_nif", 2, ucrypto_ec_set_private_key_nif}
+    {"ec_set_private_key_nif", 2, ucrypto_ec_set_private_key_nif},
+    {"ec_delete_key_nif", 1, ucrypto_ec_delete_key_nif}
 };
 
 static int on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)

@@ -41,5 +41,6 @@ ERL_NIF_TERM ucrypto_ec_get_public_key_nif(ErlNifEnv *env, int argc, const ERL_N
 ERL_NIF_TERM ucrypto_ec_set_public_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM ucrypto_ec_get_private_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 ERL_NIF_TERM ucrypto_ec_set_private_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+ERL_NIF_TERM ucrypto_ec_delete_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 #endif

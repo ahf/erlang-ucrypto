@@ -283,3 +283,20 @@ ERL_NIF_TERM ucrypto_ec_set_private_key_nif(ErlNifEnv *env, int argc, const ERL_
 
     return ATOM_OK;
 }
+
+ERL_NIF_TERM ucrypto_ec_delete_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{
+    struct ec_key_handle *handle = NULL;
+
+    if (! enif_get_resource(env, argv[0], ec_key_resource, (void **)&handle))
+        return enif_make_badarg(env);
+
+    if (! handle->key)
+        return ATOM_OK;
+
+    /* Should overwrite the key memory. */
+    EC_KEY_free(handle->key);
+    handle->key = NULL;
+
+    return ATOM_OK;
+}
