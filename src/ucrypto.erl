@@ -26,6 +26,7 @@
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
 -export([ec_new/1, ec_generate_key/1, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
+-export([hex2bin/1]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -142,16 +143,19 @@ ec_set_private_key_nif(_Key, _PrivateKey) ->
     ?nif_stub.
 
 %%
-%% Tests.
+%% Utilities.
 %%
--ifdef(TEST).
-
 hex2bin([A, B | Rest]) ->
     <<(list_to_integer([A, B], 16)), (hex2bin(Rest))/binary>>;
 hex2bin([A]) ->
     <<(list_to_integer([A], 16))>>;
 hex2bin([]) ->
     <<>>.
+
+%%
+%% Tests.
+%%
+-ifdef(TEST).
 
 hex2bin_test() ->
     [
