@@ -301,6 +301,19 @@ hex2bin_test() ->
         ?assertEqual(hex2bin("FFFFFFFF"), <<255,255,255,255>>)
     ].
 
+bin2hex_test() ->
+    [
+        ?assertEqual("", bin2hex(<<>>)),
+        ?assertEqual("00", bin2hex(<<0>>)),
+        ?assertEqual("0F", bin2hex(<<15>>)),
+        ?assertEqual("F0", bin2hex(<<240>>)),
+        ?assertEqual("FF", bin2hex(<<255>>)),
+        ?assertEqual("FFFF", bin2hex(<<255,255>>)),
+        ?assertEqual("0000", bin2hex(<<0,0>>)),
+        ?assertEqual("0001", bin2hex(<<0,1>>)),
+        ?assertEqual("FFFFFFFF", bin2hex(<<255,255,255,255>>))
+    ].
+
 ripemd160_simple_test() ->
     [
         ?assertEqual(hex2bin("9c1185a5c5e9fc54612808977ee8f548b2258d31"), ripemd160("")),
