@@ -25,7 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
+-export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_get_public_key/1, ec_set_public_key/2, ec_get_private_key/1, ec_set_private_key/2]).
 -export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
@@ -122,7 +122,7 @@ ec_verify({ec_key, KeyRef}, Data, Signature) ->
 ec_sign({ec_key, KeyRef}, Data) ->
     ec_sign_nif(KeyRef, Data).
 
-ec_public_key({ec_key, KeyRef}) ->
+ec_get_public_key({ec_key, KeyRef}) ->
     ec_get_public_key_nif(KeyRef).
 
 ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
@@ -133,7 +133,7 @@ ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
             {error, {failed_to_set_public_key, PublicKey}}
     end.
 
-ec_private_key({ec_key, KeyRef}) ->
+ec_get_private_key({ec_key, KeyRef}) ->
     ec_get_private_key_nif(KeyRef).
 
 ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
