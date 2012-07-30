@@ -25,7 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new/1, ec_generate_key/1, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
+-export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
 -export([hex2bin/1]).
 
 -ifdef(TEST).
@@ -94,29 +94,55 @@ ripemd160_final_nif(_Context) ->
 %%
 %% EC.
 %%
-ec_new(Curve) when is_atom(Curve) ->
-    ec_new_by_curve_nif(Curve).
+ec_new_key(Curve) when is_atom(Curve) ->
+    KeyRef = ec_new_by_curve_nif(Curve),
+    ec_generate_key_nif(KeyRef),
+    {ec_key, KeyRef}.
 
-ec_generate_key(KeyRef) ->
-    ec_generate_key_nif(KeyRef).
+ec_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey), is_binary(PublicKey) ->
+    KeyRef = ec_new_by_curve_nif(Curve),
+    case ec_set_private_key({ec_key, KeyRef}, PrivateKey) of
+        {ec_key, KeyRef} ->
+            ec_set_public_key({ec_key, KeyRef}, PublicKey);
+        {error, Error} ->
+            {error, Error}
+    end.
 
-ec_verify(KeyRef, Data, Signature) ->
+ec_private_key(Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
+    KeyRef = ec_new_by_curve_nif(Curve),
+    ec_set_private_key({ec_key, KeyRef}, PrivateKey).
+
+ec_public_key(Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
+    KeyRef = ec_new_by_curve_nif(Curve),
+    ec_set_public_key({ec_key, KeyRef}, PublicKey).
+
+ec_verify({ec_key, KeyRef}, Data, Signature) ->
     ec_verify_nif(KeyRef, Data, Signature).
 
-ec_sign(KeyRef, Data) ->
+ec_sign({ec_key, KeyRef}, Data) ->
     ec_sign_nif(KeyRef, Data).
 
-ec_public_key(KeyRef) ->
+ec_public_key({ec_key, KeyRef}) ->
     ec_get_public_key_nif(KeyRef).
 
-ec_set_public_key(KeyRef, PublicKey) ->
-    ec_set_public_key_nif(KeyRef, PublicKey).
+ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
+    case ec_set_public_key_nif(KeyRef, PublicKey) of
+        ok ->
+            {ec_key, KeyRef};
+        error ->
+            {error, {failed_to_set_public_key, PublicKey}}
+    end.
 
-ec_private_key(KeyRef) ->
+ec_private_key({ec_key, KeyRef}) ->
     ec_get_private_key_nif(KeyRef).
 
-ec_set_private_key(KeyRef, PrivateKey) ->
-    ec_set_private_key_nif(KeyRef, PrivateKey).
+ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
+    case ec_set_private_key_nif(KeyRef, PrivateKey) of
+        ok ->
+            {ec_key, KeyRef};
+        error ->
+            {error, {failed_to_set_private_key, PrivateKey}}
+    end.
 
 ec_new_by_curve_nif(_Curve) ->
     ?nif_stub.

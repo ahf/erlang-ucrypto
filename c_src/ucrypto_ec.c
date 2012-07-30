@@ -137,6 +137,12 @@ ERL_NIF_TERM ucrypto_ec_new_by_curve_nif(ErlNifEnv *env, int argc, const ERL_NIF
 
     handle = enif_alloc_resource(ec_key_resource, sizeof(struct ec_key_handle));
     handle->key = EC_KEY_new_by_curve_name(nid);
+
+    if (! handle->key) {
+        enif_release_resource(handle);
+        return ATOM_ERROR;
+    }
+
     ec_key = enif_make_resource(env, handle);
     enif_release_resource(handle);
 
