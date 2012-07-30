@@ -25,7 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_get_public_key/1, ec_set_public_key/2, ec_get_private_key/1, ec_set_private_key/2, ec_delete_key/1]).
+-export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2, ec_verify/3, ec_verify/4, ec_sign/2, ec_sign/3, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2, ec_delete_key/1]).
 -export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
@@ -99,7 +99,7 @@ ec_new_key(Curve) when is_atom(Curve) ->
     ec_generate_key_nif(KeyRef),
     {ec_key, KeyRef}.
 
-ec_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey), is_binary(PublicKey) ->
+ec_new_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey), is_binary(PublicKey) ->
     KeyRef = ec_new_by_curve_nif(Curve),
     case ec_set_private_key({ec_key, KeyRef}, PrivateKey) of
         {ec_key, KeyRef} ->
@@ -108,21 +108,49 @@ ec_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey),
             {error, Error}
     end.
 
-ec_private_key(Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
+ec_new_private_key(Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
     KeyRef = ec_new_by_curve_nif(Curve),
     ec_set_private_key({ec_key, KeyRef}, PrivateKey).
 
-ec_public_key(Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
+ec_new_public_key(Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
     KeyRef = ec_new_by_curve_nif(Curve),
     ec_set_public_key({ec_key, KeyRef}, PublicKey).
 
-ec_verify({ec_key, KeyRef}, Data, Signature) ->
+ec_verify(Data, Signature, {ec_key, KeyRef}) ->
     ec_verify_nif(KeyRef, Data, Signature).
 
-ec_sign({ec_key, KeyRef}, Data) ->
+ec_verify(Data, Signature, Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
+    case ec_new_public_key(Curve, PublicKey) of
+        {ec_key, KeyRef} ->
+            case ec_verify(Data, Signature, {ec_key, KeyRef}) of
+                Result when is_boolean(Result) ->
+                    ec_delete_key({ec_key, KeyRef}),
+                    Result;
+                Error ->
+                    Error
+            end;
+        Error ->
+            Error
+    end.
+
+ec_sign(Data, {ec_key, KeyRef}) ->
     ec_sign_nif(KeyRef, Data).
 
-ec_get_public_key({ec_key, KeyRef}) ->
+ec_sign(Data, Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
+    case ec_new_private_key(Curve, PrivateKey) of
+        {ec_key, KeyRef} ->
+            case ec_sign(Data, {ec_key, KeyRef}) of
+                Result when is_binary(Result) ->
+                    ec_delete_key({ec_key, KeyRef}),
+                    Result;
+                Error ->
+                    Error
+            end;
+        Error ->
+            Error
+    end.
+
+ec_public_key({ec_key, KeyRef}) ->
     ec_get_public_key_nif(KeyRef).
 
 ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
@@ -133,7 +161,7 @@ ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
             {error, {failed_to_set_public_key, PublicKey}}
     end.
 
-ec_get_private_key({ec_key, KeyRef}) ->
+ec_private_key({ec_key, KeyRef}) ->
     ec_get_private_key_nif(KeyRef).
 
 ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
