@@ -94,31 +94,67 @@ ripemd160_final_nif(_Context) ->
 %%
 %% EC.
 %%
-ec_new_key(Curve) when is_atom(Curve) ->
-    KeyRef = ec_new_by_curve_nif(Curve),
-    ec_generate_key_nif(KeyRef),
-    {ec_key, KeyRef}.
+-opaque ec_key_ref() :: binary.
+-type ec_key() :: {ec_key, ec_key_ref()}.
+-type ec_signature() :: binary.
+-type ec_public_key() :: binary.
+-type ec_private_key() :: binary.
+-type ec_curve() :: secp112r2 | secp128r1 | secp128r2 |
+                    secp160k1 | secp160r1 | secp160r2 |
+                    secp192k1 | secp224k1 | secp224r1 |
+                    secp256k1 | secp384r1 | secp521r1.
 
-ec_new_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey), is_binary(PublicKey) ->
-    KeyRef = ec_new_by_curve_nif(Curve),
-    case ec_set_private_key({ec_key, KeyRef}, PrivateKey) of
-        {ec_key, KeyRef} ->
-            ec_set_public_key({ec_key, KeyRef}, PublicKey);
-        {error, Error} ->
-            {error, Error}
+-spec ec_new_key(ec_curve()) -> ec_key() | error.
+ec_new_key(Curve) when is_atom(Curve) ->
+    case ec_new_by_curve_nif(Curve) of
+        KeyRef when is_binary(KeyRef) ->
+            case ec_generate_key_nif(KeyRef) of
+                ok ->
+                    {ec_key, KeyRef};
+                Error ->
+                    Error
+            end;
+        Error ->
+            Error
     end.
 
+-spec ec_new_key(ec_curve(), ec_private_key(), ec_public_key()) -> ec_key() | {error, any()}.
+ec_new_key(Curve, PrivateKey, PublicKey) when is_atom(Curve), is_binary(PrivateKey), is_binary(PublicKey) ->
+    case ec_new_by_curve_nif(Curve) of
+        KeyRef when is_binary(KeyRef) ->
+            case ec_set_private_key({ec_key, KeyRef}, PrivateKey) of
+                {ec_key, KeyRef} ->
+                    ec_set_public_key({ec_key, KeyRef}, PublicKey);
+                Error ->
+                    Error
+            end;
+        error ->
+            {error, unable_to_create_key}
+    end.
+
+-spec ec_new_private_key(ec_curve(), ec_private_key()) -> ec_key() | {error, any()}.
 ec_new_private_key(Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
-    KeyRef = ec_new_by_curve_nif(Curve),
-    ec_set_private_key({ec_key, KeyRef}, PrivateKey).
+    case ec_new_by_curve_nif(Curve) of
+        KeyRef when is_binary(KeyRef) ->
+            ec_set_private_key({ec_key, KeyRef}, PrivateKey);
+        error ->
+            {error, unable_to_create_key}
+    end.
 
+-spec ec_new_public_key(ec_curve(), ec_public_key()) -> ec_key() | {error, any()}.
 ec_new_public_key(Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
-    KeyRef = ec_new_by_curve_nif(Curve),
-    ec_set_public_key({ec_key, KeyRef}, PublicKey).
+    case ec_new_by_curve_nif(Curve) of
+        KeyRef when is_binary(KeyRef) ->
+            ec_set_public_key({ec_key, KeyRef}, PublicKey);
+        error ->
+            {error, unable_to_create_key}
+    end.
 
+-spec ec_verify(iodata(), ec_signature(), ec_key()) -> boolean() | {error, any()}.
 ec_verify(Data, Signature, {ec_key, KeyRef}) ->
     ec_verify_nif(KeyRef, Data, Signature).
 
+-spec ec_verify(iodata(), ec_signature(), ec_curve(), ec_key()) -> boolean() | {error, any()}.
 ec_verify(Data, Signature, Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
     case ec_new_public_key(Curve, PublicKey) of
         {ec_key, KeyRef} ->
@@ -133,9 +169,18 @@ ec_verify(Data, Signature, Curve, PublicKey) when is_atom(Curve), is_binary(Publ
             Error
     end.
 
+-spec ec_sign(iodata(), ec_key()) -> ec_signature() | {error, any()}.
 ec_sign(Data, {ec_key, KeyRef}) ->
-    ec_sign_nif(KeyRef, Data).
+    case ec_sign_nif(KeyRef, Data) of
+        Signature when is_binary(Signature) ->
+            Signature;
+        error ->
+            {error, unable_to_sign_data};
+        Error ->
+            Error
+    end.
 
+-spec ec_sign(iodata(), ec_curve(), ec_private_key()) -> ec_signature() | {error, any()}.
 ec_sign(Data, Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
     case ec_new_private_key(Curve, PrivateKey) of
         {ec_key, KeyRef} ->
@@ -150,28 +195,47 @@ ec_sign(Data, Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
             Error
     end.
 
+-spec ec_public_key(ec_key()) -> ec_public_key() | {error, any()}.
 ec_public_key({ec_key, KeyRef}) ->
-    ec_get_public_key_nif(KeyRef).
+    case ec_get_public_key_nif(KeyRef) of
+        PublicKey when is_binary(PublicKey) ->
+            PublicKey;
+        error ->
+            {error, unable_to_read_public_key};
+        Error ->
+            Error
+    end.
 
+-spec ec_set_public_key(ec_key(), ec_public_key()) -> ec_key() | {error, any()}.
 ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
     case ec_set_public_key_nif(KeyRef, PublicKey) of
         ok ->
             {ec_key, KeyRef};
         error ->
-            {error, {failed_to_set_public_key, PublicKey}}
+            {error, unable_to_set_public_key}
     end.
 
+-spec ec_private_key(ec_key()) -> ec_private_key() | {error, any()}.
 ec_private_key({ec_key, KeyRef}) ->
-    ec_get_private_key_nif(KeyRef).
+    case ec_get_private_key_nif(KeyRef) of
+        PrivateKey when is_binary(PrivateKey) ->
+            PrivateKey;
+        error ->
+            {error, unable_to_read_private_key};
+        Error ->
+            Error
+    end.
 
+-spec ec_set_private_key(ec_key(), ec_private_key()) -> ec_key() | {error, any()}.
 ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
     case ec_set_private_key_nif(KeyRef, PrivateKey) of
         ok ->
             {ec_key, KeyRef};
         error ->
-            {error, {failed_to_set_private_key, PrivateKey}}
+            {error, unable_to_set_private_key}
     end.
 
+-spec ec_delete_key(ec_key()) -> ok.
 ec_delete_key({ec_key, KeyRef}) ->
     ec_delete_key_nif(KeyRef).
 
@@ -205,6 +269,7 @@ ec_delete_key_nif(_Key) ->
 %%
 %% Utilities.
 %%
+-spec hex2bin(string()) -> binary().
 hex2bin([A, B | Rest]) ->
     <<(list_to_integer([A, B], 16)), (hex2bin(Rest))/binary>>;
 hex2bin([A]) ->
@@ -212,6 +277,7 @@ hex2bin([A]) ->
 hex2bin([]) ->
     <<>>.
 
+-spec bin2hex(binary()) -> string().
 bin2hex(Bin) when is_binary(Bin) ->
     lists:flatten([integer_to_list(X, 16) || <<X:4/integer>> <= Bin]).
 
