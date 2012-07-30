@@ -26,7 +26,7 @@
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
 -export([ec_new_key/1, ec_key/3, ec_private_key/2, ec_public_key/2, ec_verify/3, ec_sign/2, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2]).
--export([hex2bin/1]).
+-export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
@@ -177,6 +177,9 @@ hex2bin([A]) ->
     <<(list_to_integer([A], 16))>>;
 hex2bin([]) ->
     <<>>.
+
+bin2hex(Bin) when is_binary(Bin) ->
+    lists:flatten([integer_to_list(X, 16) || <<X:4/integer>> <= Bin]).
 
 %%
 %% Tests.
