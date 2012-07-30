@@ -47,8 +47,6 @@ static ERL_NIF_TERM ATOM_ERROR;
 static ERL_NIF_TERM ATOM_TRUE;
 static ERL_NIF_TERM ATOM_FALSE;
 
-static ERL_NIF_TERM ATOM_EC_KEY;
-
 /* Curves. */
 static ERL_NIF_TERM ATOM_secp112r1;
 static ERL_NIF_TERM ATOM_secp112r2;
@@ -82,8 +80,6 @@ int ucrypto_ec_on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     ATOM(ATOM_ERROR, "error");
     ATOM(ATOM_TRUE, "true");
     ATOM(ATOM_FALSE, "false");
-
-    ATOM(ATOM_EC_KEY, "ec_key");
 
     ATOM(ATOM_secp112r1, "secp112r1");
     ATOM(ATOM_secp112r2, "secp112r2");
@@ -144,7 +140,7 @@ ERL_NIF_TERM ucrypto_ec_new_by_curve_nif(ErlNifEnv *env, int argc, const ERL_NIF
     ec_key = enif_make_resource(env, handle);
     enif_release_resource(handle);
 
-    return enif_make_tuple2(env, ATOM_OK, enif_make_tuple2(env, ATOM_EC_KEY, ec_key));
+    return ec_key;
 }
 
 ERL_NIF_TERM ucrypto_ec_generate_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
