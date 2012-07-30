@@ -34,21 +34,20 @@
 
 static const int ripemd160_length = 160 / 8;
 
-ERL_NIF_TERM ucrypto_ripemd160_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM ucrypto_ripemd160_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     ErlNifBinary binary;
     ERL_NIF_TERM result;
 
-    if (!enif_inspect_iolist_as_binary(env, argv[0], &binary)) {
+    if (! enif_inspect_iolist_as_binary(env, argv[0], &binary))
         return enif_make_badarg(env);
-    }
 
     RIPEMD160(binary.data, binary.size, enif_make_new_binary(env, ripemd160_length, &result));
 
     return result;
 }
 
-ERL_NIF_TERM ucrypto_ripemd160_init_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM ucrypto_ripemd160_init_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     ERL_NIF_TERM result;
 
@@ -57,35 +56,34 @@ ERL_NIF_TERM ucrypto_ripemd160_init_nif(ErlNifEnv* env, int argc, const ERL_NIF_
     return result;
 }
 
-ERL_NIF_TERM ucrypto_ripemd160_update_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM ucrypto_ripemd160_update_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
-    RIPEMD160_CTX* new_context;
+    RIPEMD160_CTX *new_context;
     ErlNifBinary context_binary, data_binary;
     ERL_NIF_TERM result;
 
-    if (!enif_inspect_binary(env, argv[0], &context_binary)
-            || context_binary.size != sizeof(RIPEMD160_CTX)
-            || !enif_inspect_iolist_as_binary(env, argv[1], &data_binary)) {
+    if (! enif_inspect_binary(env, argv[0], &context_binary) || context_binary.size != sizeof(RIPEMD160_CTX))
         return enif_make_badarg(env);
-    }
+
+    if (! enif_inspect_iolist_as_binary(env, argv[1], &data_binary))
+        return enif_make_badarg(env);
 
     new_context = (RIPEMD160_CTX *)enif_make_new_binary(env, sizeof(RIPEMD160_CTX), &result);
     memcpy(new_context, context_binary.data, sizeof(RIPEMD160_CTX));
+
     RIPEMD160_Update(new_context, data_binary.data, data_binary.size);
 
     return result;
 }
 
-ERL_NIF_TERM ucrypto_ripemd160_final_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+ERL_NIF_TERM ucrypto_ripemd160_final_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 {
     ErlNifBinary context_binary;
     RIPEMD160_CTX context_clone;
     ERL_NIF_TERM result;
 
-    if (!enif_inspect_binary(env, argv[0], &context_binary)
-            || context_binary.size != sizeof(RIPEMD160_CTX)) {
+    if (! enif_inspect_binary(env, argv[0], &context_binary) || context_binary.size != sizeof(RIPEMD160_CTX))
         return enif_make_badarg(env);
-    }
 
     memcpy(&context_clone, context_binary.data, sizeof(RIPEMD160_CTX));
     RIPEMD160_Final(enif_make_new_binary(env, ripemd160_length, &result), &context_clone);

@@ -74,7 +74,7 @@ static void ec_key_handle_cleanup(ErlNifEnv *env, void *data)
     handle->key = NULL;
 }
 
-int ucrypto_ec_on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
+int ucrypto_ec_on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
     ec_key_resource = enif_open_resource_type(env, NULL, "ucrypto_ec_resource", &ec_key_handle_cleanup, (ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER), NULL);
 

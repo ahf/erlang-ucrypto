@@ -48,7 +48,7 @@ static ErlNifFunc nif_functions[] = {
     {"ec_set_private_key_nif", 2, ucrypto_ec_set_private_key_nif}
 };
 
-static int on_load(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
+static int on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
     if (0 != ucrypto_ec_on_load(env, priv_data, load_info))
         return 1;
