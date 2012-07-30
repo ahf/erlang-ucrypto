@@ -46,6 +46,7 @@ static ERL_NIF_TERM ATOM_OK;
 static ERL_NIF_TERM ATOM_ERROR;
 static ERL_NIF_TERM ATOM_TRUE;
 static ERL_NIF_TERM ATOM_FALSE;
+static ERL_NIF_TERM ATOM_UNINITIALIZED_KEY;
 
 /* Curves. */
 static ERL_NIF_TERM ATOM_secp112r1;
@@ -80,6 +81,7 @@ int ucrypto_ec_on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     ATOM(ATOM_ERROR, "error");
     ATOM(ATOM_TRUE, "true");
     ATOM(ATOM_FALSE, "false");
+    ATOM(ATOM_UNINITIALIZED_KEY, "uninitialized_key");
 
     ATOM(ATOM_secp112r1, "secp112r1");
     ATOM(ATOM_secp112r2, "secp112r2");
@@ -156,6 +158,9 @@ ERL_NIF_TERM ucrypto_ec_generate_key_nif(ErlNifEnv *env, int argc, const ERL_NIF
     if (! enif_get_resource(env, argv[0], ec_key_resource, (void **)&handle))
         return enif_make_badarg(env);
 
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
+
     if (! EC_KEY_generate_key(handle->key))
         return ATOM_ERROR;
 
@@ -177,6 +182,9 @@ ERL_NIF_TERM ucrypto_ec_verify_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM 
     if (! enif_inspect_iolist_as_binary(env, argv[2], &signature))
         return enif_make_badarg(env);
 
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
+
     if (1 == ECDSA_verify(0, data.data, data.size, signature.data, signature.size, handle->key))
         return ATOM_TRUE;
 
@@ -196,6 +204,9 @@ ERL_NIF_TERM ucrypto_ec_sign_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     if (! enif_inspect_iolist_as_binary(env, argv[1], &data))
         return enif_make_badarg(env);
 
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
+
     enif_alloc_binary(ECDSA_size(handle->key), &signature);
 
     if (! ECDSA_sign(0, data.data, data.size, signature.data, &length, handle->key))
@@ -214,6 +225,9 @@ ERL_NIF_TERM ucrypto_ec_get_public_key_nif(ErlNifEnv *env, int argc, const ERL_N
 
     if (! enif_get_resource(env, argv[0], ec_key_resource, (void **)&handle))
         return enif_make_badarg(env);
+
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
 
     length = i2o_ECPublicKey(handle->key, NULL);
 
@@ -239,6 +253,9 @@ ERL_NIF_TERM ucrypto_ec_set_public_key_nif(ErlNifEnv *env, int argc, const ERL_N
     if (! enif_inspect_iolist_as_binary(env, argv[1], &public_key))
         return enif_make_badarg(env);
 
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
+
     if (! o2i_ECPublicKey(&handle->key, (const unsigned char **)&public_key.data, public_key.size))
         return ATOM_ERROR;
 
@@ -253,6 +270,9 @@ ERL_NIF_TERM ucrypto_ec_get_private_key_nif(ErlNifEnv *env, int argc, const ERL_
 
     if (! enif_get_resource(env, argv[0], ec_key_resource, (void **)&handle))
         return enif_make_badarg(env);
+
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
 
     length = i2d_ECPrivateKey(handle->key, NULL);
 
@@ -277,6 +297,9 @@ ERL_NIF_TERM ucrypto_ec_set_private_key_nif(ErlNifEnv *env, int argc, const ERL_
 
     if (! enif_inspect_iolist_as_binary(env, argv[1], &private_key))
         return enif_make_badarg(env);
+
+    if (! handle->key)
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
 
     if (! d2i_ECPrivateKey(&handle->key, (const unsigned char **)&private_key.data, private_key.size))
         return ATOM_ERROR;
