@@ -104,7 +104,7 @@ ripemd160_final_nif(_Context) ->
                     secp192k1 | secp224k1 | secp224r1 |
                     secp256k1 | secp384r1 | secp521r1.
 
--spec ec_new_key(ec_curve()) -> ec_key() | error.
+-spec ec_new_key(ec_curve()) -> ec_key() | {error, any()}.
 ec_new_key(Curve) when is_atom(Curve) ->
     case ec_new_by_curve_nif(Curve) of
         KeyRef when is_binary(KeyRef) ->
@@ -114,6 +114,8 @@ ec_new_key(Curve) when is_atom(Curve) ->
                 Error ->
                     Error
             end;
+        error ->
+            {error, unable_to_create_key};
         Error ->
             Error
     end.

@@ -47,6 +47,7 @@ static ERL_NIF_TERM ATOM_ERROR;
 static ERL_NIF_TERM ATOM_TRUE;
 static ERL_NIF_TERM ATOM_FALSE;
 static ERL_NIF_TERM ATOM_UNINITIALIZED_KEY;
+static ERL_NIF_TERM ATOM_UNKNOWN_CURVE;
 
 /* Curves. */
 static ERL_NIF_TERM ATOM_secp112r1;
@@ -82,6 +83,7 @@ int ucrypto_ec_on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     ATOM(ATOM_TRUE, "true");
     ATOM(ATOM_FALSE, "false");
     ATOM(ATOM_UNINITIALIZED_KEY, "uninitialized_key");
+    ATOM(ATOM_UNKNOWN_CURVE, "unknown_curve");
 
     ATOM(ATOM_secp112r1, "secp112r1");
     ATOM(ATOM_secp112r2, "secp112r2");
@@ -135,7 +137,7 @@ ERL_NIF_TERM ucrypto_ec_new_by_curve_nif(ErlNifEnv *env, int argc, const ERL_NIF
     else if (ATOM_secp521r1 == curve)
         nid = NID_secp521r1;
     else
-        return enif_make_badarg(env);
+        return enif_make_tuple2(env, ATOM_ERROR, enif_make_tuple2(env, ATOM_UNKNOWN_CURVE, curve));
 
     handle = enif_alloc_resource(ec_key_resource, sizeof(struct ec_key_handle));
     handle->key = EC_KEY_new_by_curve_name(nid);
