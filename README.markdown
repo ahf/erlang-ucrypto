@@ -60,6 +60,22 @@ true
 <<255,255,0,127,1>>
 ```
 
+Contributing
+------------
+
+Contributions to µCrypto are welcome. Please go ahead and fork the project here
+on Github and submit merge requests when you have something ready for review. I
+will then give some feedback and once everything looks good, I will merge your
+contributions into the mainline repository.
+
+### Continuous Integration
+
+We are currently using [Travis CI](http://www.travis-ci.org/) for continuous
+integration. When submitting patches, please ensure that the entire project
+builds and tests are passing.
+
+Current Status: [![Build Status](https://secure.travis-ci.org/ahf/erlang-ucrypto.png)](http://travis-ci.org/ahf/erlang-ucrypto)
+
 Authors
 -------
 
