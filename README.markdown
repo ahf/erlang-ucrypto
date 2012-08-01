@@ -74,7 +74,7 @@ We are currently using [Travis CI](http://www.travis-ci.org/) for continuous
 integration. When submitting patches, please ensure that the entire project
 builds and tests are passing.
 
-Current Status: [![Build Status](https://secure.travis-ci.org/ahf/erlang-ucrypto.png)](http://travis-ci.org/ahf/erlang-ucrypto)
+[![Build Status](https://secure.travis-ci.org/ahf/erlang-ucrypto.png)](http://travis-ci.org/ahf/erlang-ucrypto)
 
 Authors
 -------
