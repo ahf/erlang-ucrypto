@@ -209,12 +209,16 @@ ERL_NIF_TERM ucrypto_ec_sign_nif(ErlNifEnv *env, int argc, const ERL_NIF_TERM ar
     if (! handle->key)
         return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
 
-    enif_alloc_binary(ECDSA_size(handle->key), &signature);
+    length = ECDSA_size(handle->key);
+
+    if (! enif_alloc_binary(length, &signature))
+        return ATOM_ERROR;
 
     if (! ECDSA_sign(0, data.data, data.size, signature.data, &length, handle->key))
         return ATOM_ERROR;
 
-    enif_realloc_binary(&signature, length);
+    if (! enif_realloc_binary(&signature, length))
+        return ATOM_ERROR;
 
     return enif_make_binary(env, &signature);
 }
