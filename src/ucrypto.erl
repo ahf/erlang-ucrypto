@@ -25,7 +25,7 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2, ec_verify/3, ec_verify/4, ec_sign/2, ec_sign/3, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2, ec_delete_key/1]).
+-export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2, ec_verify/3, ec_verify/4, ec_sign/2, ec_sign/3, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2, ec_delete_key/1, ec_curve_size/1]).
 -export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
@@ -99,10 +99,10 @@ ripemd160_final_nif(_Context) ->
 -type ec_signature() :: binary.
 -type ec_public_key() :: binary.
 -type ec_private_key() :: binary.
--type ec_curve() :: secp112r2 | secp128r1 | secp128r2 |
-                    secp160k1 | secp160r1 | secp160r2 |
-                    secp192k1 | secp224k1 | secp224r1 |
-                    secp256k1 | secp384r1 | secp521r1.
+-type ec_curve() :: secp112r1 | secp112r2 | secp128r1 | secp128r2 |
+                    secp160k1 | secp160r1 | secp160r2 | secp192k1 |
+                    secp224k1 | secp224r1 | secp256k1 | secp384r1 |
+                    secp521r1.
 
 -spec ec_new_key(ec_curve()) -> ec_key() | {error, any()}.
 ec_new_key(Curve) when is_atom(Curve) ->
@@ -214,7 +214,9 @@ ec_set_public_key({ec_key, KeyRef}, PublicKey) when is_binary(PublicKey) ->
         ok ->
             {ec_key, KeyRef};
         error ->
-            {error, unable_to_set_public_key}
+            {error, unable_to_set_public_key};
+        Error ->
+            Error
     end.
 
 -spec ec_private_key(ec_key()) -> ec_private_key() | {error, any()}.
@@ -234,12 +236,29 @@ ec_set_private_key({ec_key, KeyRef}, PrivateKey) when is_binary(PrivateKey) ->
         ok ->
             {ec_key, KeyRef};
         error ->
-            {error, unable_to_set_private_key}
+            {error, unable_to_set_private_key};
+        Error ->
+            Error
     end.
 
 -spec ec_delete_key(ec_key()) -> ok.
 ec_delete_key({ec_key, KeyRef}) ->
     ec_delete_key_nif(KeyRef).
+
+-spec ec_curve_size(ec_curve()) -> integer().
+ec_curve_size(secp112r1) -> 112;
+ec_curve_size(secp112r2) -> 112;
+ec_curve_size(secp128r1) -> 128;
+ec_curve_size(secp128r2) -> 128;
+ec_curve_size(secp160k1) -> 160;
+ec_curve_size(secp160r1) -> 160;
+ec_curve_size(secp160r2) -> 160;
+ec_curve_size(secp192k1) -> 192;
+ec_curve_size(secp224k1) -> 224;
+ec_curve_size(secp224r1) -> 224;
+ec_curve_size(secp256k1) -> 256;
+ec_curve_size(secp384r1) -> 384;
+ec_curve_size(secp521r1) -> 521.
 
 ec_new_by_curve_nif(_Curve) ->
     ?nif_stub.
@@ -328,5 +347,87 @@ ripemd160_test() ->
     InitialContext = ripemd160_init(),
     FinalContext = lists:foldl(fun(X, Context) -> ripemd160_update(Context, X) end, InitialContext, List),
     ?assertEqual(hex2bin("5d74fef3f73507f0e8a8ff9ec8cdd88988c472ca"), ripemd160_final(FinalContext)).
+
+foreach_curve(Fun) ->
+    Curves = [secp112r1, secp112r2, secp128r1, secp128r2,
+              secp160k1, secp160r1, secp160r2, secp192k1,
+              secp224k1, secp224r1, secp256k1, secp384r1,
+              secp521r1],
+    lists:foreach(Fun, Curves).
+
+ec_new_key_test() ->
+    foreach_curve(fun(Curve) -> ?assertEqual({ec_key, <<>>}, ec_new_key(Curve)) end),
+    ?assertEqual({error, {unknown_curve, ok}}, ec_new_key(ok)),
+    ?assertEqual({error, {unknown_curve, foobar}}, ec_new_key(foobar)).
+
+ec_public_key_test() ->
+    foreach_curve(fun(Curve) ->
+        Key = ec_new_key(Curve),
+        ?assertEqual({ec_key, <<>>}, Key),
+
+        PublicKeyData = ec_public_key(Key),
+        ?assertEqual(Key, ec_set_public_key(Key, PublicKeyData)),
+        ?assertEqual(PublicKeyData, ec_public_key(Key)),
+
+        PublicKey = ec_new_public_key(Curve, PublicKeyData),
+        ?assertEqual({ec_key, <<>>}, PublicKey),
+        ?assertEqual(PublicKeyData, ec_public_key(PublicKey))
+    end).
+
+ec_private_key_test() ->
+    foreach_curve(fun(Curve) ->
+        Key = ec_new_key(Curve),
+        ?assertEqual({ec_key, <<>>}, Key),
+
+        PrivateKeyData = ec_private_key(Key),
+        ?assertEqual(Key, ec_set_private_key(Key, PrivateKeyData)),
+        ?assertEqual(PrivateKeyData, ec_private_key(Key)),
+
+        PrivateKey = ec_new_private_key(Curve, PrivateKeyData),
+        ?assertEqual({ec_key, <<>>}, PrivateKey),
+        ?assertEqual(PrivateKeyData, ec_private_key(PrivateKey))
+    end).
+
+ec_verify_test() ->
+    Curve = secp256k1,
+    PublicKeyData = "04218EBA91D19A0AB7EEA223A6D8693E4A48BA42A3FCA8EFE698501646A592143"
+                    "1803C9D91977E36B75E155BAFE82DCE76A05B3C2022E0CE2F5FBCD237503C5215",
+    SignatureData = "3046022100CBE747BCBFDE88F90798A86908B45903907419BAC49511A7BDFFF5F522B5EC"
+                    "D4022100D3AC513B84D7D2E448EA2104B48D9684770751A3D0946A6DF03072306391A951",
+    PublicKey = ec_new_public_key(Curve, hex2bin(PublicKeyData)),
+    Signature = hex2bin(SignatureData),
+    ?assert(ec_verify("Hello world!", Signature, PublicKey)),
+    ?assertNot(ec_verify("Hello universe!", Signature, PublicKey)),
+    ?assertNot(ec_verify("Hello world!", <<13,37>>, PublicKey)).
+
+ec_verify2_test() ->
+    foreach_curve(fun(Curve) ->
+        Key = ec_new_key(Curve),
+        ?assertEqual({ec_key, <<>>}, Key),
+
+        % Subtract 1 to make room for our "X".
+        MaxBytes = ec_curve_size(Curve) div 8,
+        Message = crypto:rand_bytes(MaxBytes - 1),
+
+        Signature = ec_sign(Message, Key),
+        ?assertMatch(X when is_binary(X), Signature),
+        ?assert(ec_verify(Message, Signature, Key)),
+        ?assertNot(ec_verify(<<Message/binary, "X">>, Signature, Key)),
+        ?assertNot(ec_verify(<<"X", Message/binary>>, Signature, Key)),
+        ?assertNot(ec_verify(Message, <<1337>>, Key))
+    end).
+
+ec_delete_key_test() ->
+    foreach_curve(fun(Curve) ->
+        Key = ec_new_key(Curve),
+        ?assertEqual(ok, ec_delete_key(Key)),
+        ?assertEqual({error, uninitialized_key}, ec_delete_key(Key)),
+        ?assertEqual({error, uninitialized_key}, ec_public_key(Key)),
+        ?assertEqual({error, uninitialized_key}, ec_private_key(Key)),
+        ?assertEqual({error, uninitialized_key}, ec_set_public_key(Key, <<>>)),
+        ?assertEqual({error, uninitialized_key}, ec_set_private_key(Key, <<>>)),
+        ?assertEqual({error, uninitialized_key}, ec_sign("Foobar", Key)),
+        ?assertEqual({error, uninitialized_key}, ec_verify("Foobar", <<255>>, Key))
+    end).
 
 -endif.
