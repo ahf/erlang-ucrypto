@@ -321,7 +321,7 @@ ERL_NIF_TERM ucrypto_ec_delete_key_nif(ErlNifEnv *env, int argc, const ERL_NIF_T
         return enif_make_badarg(env);
 
     if (! handle->key)
-        return ATOM_OK;
+        return enif_make_tuple2(env, ATOM_ERROR, ATOM_UNINITIALIZED_KEY);
 
     /* Should overwrite the key memory. */
     EC_KEY_free(handle->key);
