@@ -156,7 +156,7 @@ ec_new_public_key(Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
 ec_verify(Data, Signature, {ec_key, KeyRef}) ->
     ec_verify_nif(KeyRef, Data, Signature).
 
--spec ec_verify(iodata(), ec_signature(), ec_curve(), ec_key()) -> boolean() | {error, any()}.
+-spec ec_verify(iodata(), ec_signature(), ec_curve(), ec_public_key()) -> boolean() | {error, any()}.
 ec_verify(Data, Signature, Curve, PublicKey) when is_atom(Curve), is_binary(PublicKey) ->
     case ec_new_public_key(Curve, PublicKey) of
         {ec_key, KeyRef} ->
