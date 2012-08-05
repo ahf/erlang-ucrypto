@@ -25,7 +25,11 @@
 
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
--export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2, ec_verify/3, ec_verify/4, ec_sign/2, ec_sign/3, ec_public_key/1, ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2, ec_delete_key/1, ec_curve_size/1]).
+-export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2,
+        ec_verify/3, ec_verify/4, ec_verify_hash/4, ec_verify_hash/5,
+        ec_sign/2, ec_sign/3, ec_sign_hash/3, ec_sign_hash/4, ec_public_key/1,
+        ec_set_public_key/2, ec_private_key/1, ec_set_private_key/2,
+        ec_delete_key/1, ec_curve_size/1]).
 -export([hex2bin/1, bin2hex/1]).
 
 -ifdef(TEST).
@@ -99,6 +103,7 @@ ripemd160_final_nif(_Context) ->
 -type ec_signature() :: binary.
 -type ec_public_key() :: binary.
 -type ec_private_key() :: binary.
+-type ec_hash_function() :: fun((iodata()) -> binary()).
 -type ec_curve() :: secp112r1 | secp112r2 | secp128r1 | secp128r2 |
                     secp160k1 | secp160r1 | secp160r2 | secp192k1 |
                     secp224k1 | secp224r1 | secp256k1 | secp384r1 |
@@ -171,6 +176,14 @@ ec_verify(Data, Signature, Curve, PublicKey) when is_atom(Curve), is_binary(Publ
             Error
     end.
 
+-spec ec_verify_hash(iodata(), ec_hash_function(), ec_signature(), ec_key()) -> boolean() | {error, any()}.
+ec_verify_hash(Data, Hash, Signature, Key) ->
+    ec_verify(Hash(Data), Signature, Key).
+
+-spec ec_verify_hash(iodata(), ec_hash_function(), ec_signature(), ec_curve(), ec_public_key()) -> boolean() | {error, any()}.
+ec_verify_hash(Data, Hash, Signature, Curve, PublicKey) ->
+    ec_verify(Hash(Data), Signature, Curve, PublicKey).
+
 -spec ec_sign(iodata(), ec_key()) -> ec_signature() | {error, any()}.
 ec_sign(Data, {ec_key, KeyRef}) ->
     case ec_sign_nif(KeyRef, Data) of
@@ -196,6 +209,14 @@ ec_sign(Data, Curve, PrivateKey) when is_atom(Curve), is_binary(PrivateKey) ->
         Error ->
             Error
     end.
+
+-spec ec_sign_hash(iodata(), ec_hash_function(), ec_key()) -> ec_signature() | {error, any()}.
+ec_sign_hash(Data, Hash, Key) ->
+    ec_sign(Hash(Data), Key).
+
+-spec ec_sign_hash(iodata(), ec_hash_function(), ec_curve(), ec_private_key()) -> ec_signature() | {error, any()}.
+ec_sign_hash(Data, Hash, Curve, PrivateKey) ->
+    ec_sign(Hash(Data), Curve, PrivateKey).
 
 -spec ec_public_key(ec_key()) -> ec_public_key() | {error, any()}.
 ec_public_key({ec_key, KeyRef}) ->
@@ -416,6 +437,26 @@ ec_verify2_test() ->
         ?assertNot(ec_verify(<<"X", Message/binary>>, Signature, Key)),
         ?assertNot(ec_verify(Message, <<1337>>, Key))
     end).
+
+ec_verify_hash_test() ->
+    Curve = secp256k1,
+    PublicKeyData = "04F8C19E6176EEB1C73C784DFD84C5416CD4AC1EA6482EFE62565E6E93DEC4FD8"
+                    "F8E08C4E806714EC7BB01CD250CB3F11F19C2F0AC9B83220792D3B282D3AB2A23",
+    SignatureData = "30460221009FB323D1316549632592A05AC3D9EAA1636E2F8C0278815A946830B59266C7"
+                    "D0022100A68D859FE8C990DD87E8710117EDC131606B8672039BF6871A604F45D3151CBB",
+    PublicKey = ec_new_public_key(Curve, hex2bin(PublicKeyData)),
+    Signature = hex2bin(SignatureData),
+    ?assert(ec_verify_hash("Hello world!", fun crypto:sha256/1, Signature, PublicKey)),
+    ?assertNot(ec_verify_hash("Hello universe!", fun crypto:sha256/1, Signature, PublicKey)),
+    ?assertNot(ec_verify_hash("Hello world!", fun crypto:sha256/1, <<13,37>>, PublicKey)),
+    ?assertNot(ec_verify_hash("Hello world!", fun crypto:sha/1, Signature, PublicKey)).
+
+ec_sign_hash_test() ->
+    Curve = secp256k1,
+    Key = ec_new_key(Curve),
+    Signature = ec_sign_hash("Hello world!", fun crypto:sha256/1, Key),
+    ?assert(ec_verify_hash("Hello world!", fun crypto:sha256/1, Signature, Key)),
+    ?assertNot(ec_verify_hash("  Hello world!", fun crypto:sha256/1, Signature, Key)).
 
 ec_delete_key_test() ->
     foreach_curve(fun(Curve) ->
