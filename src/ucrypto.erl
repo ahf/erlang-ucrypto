@@ -333,8 +333,6 @@ bin2hex(Bin) when is_binary(Bin) ->
 %%
 -ifdef(TEST).
 
--spec test() -> any().
-
 -spec hex2bin_test() -> any().
 hex2bin_test() ->
     [

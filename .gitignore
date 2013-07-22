@@ -5,6 +5,5 @@
 deps/*
 ebin
 priv/*
-doc
 
 README.html
