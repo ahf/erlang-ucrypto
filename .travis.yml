@@ -1,4 +1,10 @@
 language: erlang
+notifications:
+    irc:
+        channels:
+            - "chat.freenode.net#peculium"
+        use_notice: true
+        skip_join: true
 otp_release:
     - R16B
     - R15B03
