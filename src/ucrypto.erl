@@ -1,28 +1,37 @@
-%%
-%% Copyright (c) 2012 Alexander Færøy
-%% All rights reserved.
-%%
-%% Redistribution and use in source and binary forms, with or without
-%% modification, are permitted provided that the following conditions are met:
-%%
-%% * Redistributions of source code must retain the above copyright notice, this
-%%   list of conditions and the following disclaimer.
-%%
-%% * Redistributions in binary form must reproduce the above copyright notice,
-%%   this list of conditions and the following disclaimer in the documentation
-%%   and/or other materials provided with the distribution.
-%%
-%% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-%% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-%% DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-%% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-%% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-%% SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-%% CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-%% OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-%% OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+%%%
+%%% Copyright (c) 2012, 2013 Alexander Færøy.
+%%% All rights reserved.
+%%%
+%%% Redistribution and use in source and binary forms, with or without
+%%% modification, are permitted provided that the following conditions are met:
+%%%
+%%% * Redistributions of source code must retain the above copyright notice, this
+%%%   list of conditions and the following disclaimer.
+%%%
+%%% * Redistributions in binary form must reproduce the above copyright notice,
+%%%   this list of conditions and the following disclaimer in the documentation
+%%%   and/or other materials provided with the distribution.
+%%%
+%%% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+%%% ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+%%% WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+%%% DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+%%% FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+%%% DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+%%% SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+%%% CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+%%% OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+%%% OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+%%%
+%%% ----------------------------------------------------------------------------
+%%% @author     Alexander Færøy <ahf@0x90.dk>
+%%% @copyright  2012, 2013 Alexander Færøy
+%%% @end
+%%% ----------------------------------------------------------------------------
+%%% @doc uCrypto.
+%%% This module contains the public API for the uCrypto library.
+%%% @end
+%%% ----------------------------------------------------------------------------
 -module(ucrypto).
 -export([ripemd160/1, ripemd160_init/0, ripemd160_update/2, ripemd160_final/1]).
 -export([ec_new_key/1, ec_new_key/3, ec_new_private_key/2, ec_new_public_key/2,
@@ -98,16 +107,12 @@ ripemd160_final_nif(_Context) ->
 %%
 %% EC.
 %%
--opaque ec_key_ref() :: binary.
--type ec_key() :: {ec_key, ec_key_ref()}.
--type ec_signature() :: binary.
--type ec_public_key() :: binary.
--type ec_private_key() :: binary.
--type ec_hash_function() :: fun((iodata()) -> binary()).
--type ec_curve() :: secp112r1 | secp112r2 | secp128r1 | secp128r2 |
-                    secp160k1 | secp160r1 | secp160r2 | secp192k1 |
-                    secp224k1 | secp224r1 | secp256k1 | secp384r1 |
-                    secp521r1.
+-type ec_key() :: ucrypto_types:ec_key().
+-type ec_signature() :: ucrypto_types:ec_signature().
+-type ec_public_key() :: ucrypto_types:ec_public_key().
+-type ec_private_key() :: ucrypto_types:ec_private_key().
+-type ec_hash_function() :: ucrypto_types:ec_hash_function().
+-type ec_curve() :: ucrypto_types:ec_curve().
 
 -spec ec_new_key(ec_curve()) -> ec_key() | {error, any()}.
 ec_new_key(Curve) when is_atom(Curve) ->
