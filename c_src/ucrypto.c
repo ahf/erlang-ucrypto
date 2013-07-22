@@ -57,4 +57,9 @@ static int on_load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
-ERL_NIF_INIT(ucrypto, nif_functions, on_load, /* reload */ NULL, /* upgrade */ NULL, /* unload */ NULL);
+static int on_upgrade(ErlNifEnv *env, void **priv_data, void **old_priv_data, ERL_NIF_TERM load_info)
+{
+    return on_load(env, priv_data, load_info);
+}
+
+ERL_NIF_INIT(ucrypto, nif_functions, on_load, /* reload */ NULL, on_upgrade, /* unload */ NULL);
