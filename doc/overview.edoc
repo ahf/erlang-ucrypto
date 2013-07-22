@@ -6,12 +6,8 @@
 @doc
 
 µCrypto is a thin Erlang wrapper for the OpenSSL library. Most of the features
-in this library should be upstreamed and included the crypto module of the OTP
-codebase.
-
-The need for this module is the fact that Erlang's built-in crypto modules
-lacks certain features that would be nice to have in one of our future
-applications.
+in this library should be upstreamed and integrated into the crypto module of
+the OTP codebase.
 
 == Contributing ==
 
@@ -22,9 +18,9 @@ contributions into the mainline repository.
 
 == Continuous Integration ==
 
-We are currently using [Travis CI](http://www.travis-ci.org/) for continuous
-integration. When submitting patches, please ensure that the entire project
-compiles without errors and our tests are passing.
+We are using [Travis CI](http://www.travis-ci.org/) for continuous integration.
+When submitting patches, please ensure that the entire project compiles,
+without errors and warnings, and ensure that our tests are passing successfully.
 
 [![Build Status](https://secure.travis-ci.org/ahf/erlang-ucrypto.png)](http://travis-ci.org/ahf/erlang-ucrypto)
 
