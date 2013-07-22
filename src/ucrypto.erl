@@ -333,6 +333,9 @@ bin2hex(Bin) when is_binary(Bin) ->
 %%
 -ifdef(TEST).
 
+-spec test() -> any().
+
+-spec hex2bin_test() -> any().
 hex2bin_test() ->
     [
         ?assertEqual(hex2bin(""), <<>>),
@@ -348,6 +351,7 @@ hex2bin_test() ->
         ?assertEqual(hex2bin("FFFFFFFF"), <<255,255,255,255>>)
     ].
 
+-spec bin2hex_test() -> any().
 bin2hex_test() ->
     [
         ?assertEqual("", bin2hex(<<>>)),
@@ -361,6 +365,7 @@ bin2hex_test() ->
         ?assertEqual("FFFFFFFF", bin2hex(<<255,255,255,255>>))
     ].
 
+-spec ripemd160_simple_test() -> any().
 ripemd160_simple_test() ->
     [
         ?assertEqual(hex2bin("9c1185a5c5e9fc54612808977ee8f548b2258d31"), ripemd160("")),
@@ -368,6 +373,7 @@ ripemd160_simple_test() ->
         ?assertEqual(hex2bin("5d74fef3f73507f0e8a8ff9ec8cdd88988c472ca"), ripemd160("abcdefghijklmnopqrstuvwxyzæøå"))
     ].
 
+-spec ripemd160_test() -> any().
 ripemd160_test() ->
     List = ["abc", "def", "gh", "ijkl", "mno", "pqrs", "tuvwx", "yzæøå"],
     InitialContext = ripemd160_init(),
@@ -381,11 +387,13 @@ foreach_curve(Fun) ->
               secp521r1],
     lists:foreach(Fun, Curves).
 
+-spec ec_new_key_test() -> any().
 ec_new_key_test() ->
     foreach_curve(fun(Curve) -> ?assertEqual({ec_key, <<>>}, ec_new_key(Curve)) end),
     ?assertEqual({error, {unknown_curve, ok}}, ec_new_key(ok)),
     ?assertEqual({error, {unknown_curve, foobar}}, ec_new_key(foobar)).
 
+-spec ec_public_key_test() -> any().
 ec_public_key_test() ->
     foreach_curve(fun(Curve) ->
         Key = ec_new_key(Curve),
@@ -400,6 +408,7 @@ ec_public_key_test() ->
         ?assertEqual(PublicKeyData, ec_public_key(PublicKey))
     end).
 
+-spec ec_private_key_test() -> any().
 ec_private_key_test() ->
     foreach_curve(fun(Curve) ->
         Key = ec_new_key(Curve),
@@ -414,6 +423,7 @@ ec_private_key_test() ->
         ?assertEqual(PrivateKeyData, ec_private_key(PrivateKey))
     end).
 
+-spec ec_verify_test() -> any().
 ec_verify_test() ->
     Curve = secp256k1,
     PublicKeyData = "04218EBA91D19A0AB7EEA223A6D8693E4A48BA42A3FCA8EFE698501646A592143"
@@ -426,6 +436,7 @@ ec_verify_test() ->
     ?assertNot(ec_verify("Hello universe!", Signature, PublicKey)),
     ?assertNot(ec_verify("Hello world!", <<13,37>>, PublicKey)).
 
+-spec ec_verify2_test() -> any().
 ec_verify2_test() ->
     foreach_curve(fun(Curve) ->
         Key = ec_new_key(Curve),
@@ -443,6 +454,7 @@ ec_verify2_test() ->
         ?assertNot(ec_verify(Message, <<1337>>, Key))
     end).
 
+-spec ec_verify_hash_test() -> any().
 ec_verify_hash_test() ->
     Curve = secp256k1,
     PublicKeyData = "04F8C19E6176EEB1C73C784DFD84C5416CD4AC1EA6482EFE62565E6E93DEC4FD8"
@@ -456,6 +468,7 @@ ec_verify_hash_test() ->
     ?assertNot(ec_verify_hash("Hello world!", fun crypto:sha256/1, <<13,37>>, PublicKey)),
     ?assertNot(ec_verify_hash("Hello world!", fun crypto:sha/1, Signature, PublicKey)).
 
+-spec ec_sign_hash_test() -> any().
 ec_sign_hash_test() ->
     Curve = secp256k1,
     Key = ec_new_key(Curve),
@@ -463,6 +476,7 @@ ec_sign_hash_test() ->
     ?assert(ec_verify_hash("Hello world!", fun crypto:sha256/1, Signature, Key)),
     ?assertNot(ec_verify_hash("  Hello world!", fun crypto:sha256/1, Signature, Key)).
 
+-spec ec_delete_key_test() -> any().
 ec_delete_key_test() ->
     foreach_curve(fun(Curve) ->
         Key = ec_new_key(Curve),
