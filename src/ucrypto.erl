@@ -488,4 +488,6 @@ ec_delete_key_test() ->
         ?assertEqual({error, uninitialized_key}, ec_verify("Foobar", <<255>>, Key))
     end).
 
+-spec test() -> any().
+
 -endif.

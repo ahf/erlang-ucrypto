@@ -7,12 +7,13 @@ Copyright (c) 2012, 2013 Alexander Færøy
 
 __Authors:__ Alexander Færøy ([`ahf@0x90.dk`](mailto:ahf@0x90.dk)).
 
-µCrypto is a thin Erlang wrapper for the OpenSSL library. The idea is to aim
-towards upstreaming most of the features added to this library to the OTP
+µCrypto is a thin Erlang wrapper for the OpenSSL library. Most of the features
+in this library should be upstreamed and included the crypto module of the OTP
 codebase.
 
-The rationale for this module is the fact that Erlang's built-in crypto modules
-lacks certain features that would be nice to have in your applications.
+The need for this module is the fact that Erlang's built-in crypto modules
+lacks certain features that would be nice to have in one of our future
+applications.
 
 
 ### <a name="Contributing">Contributing</a> ###
