@@ -41,11 +41,9 @@
         ec_delete_key/1, ec_curve_size/1]).
 -export([hex2bin/1, bin2hex/1]).
 
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
--endif.
-
 -on_load(init/0).
+
+-include("ucrypto_test.hrl").
 
 %%
 %% NIF's.
@@ -363,6 +361,11 @@ bin2hex_test() ->
         ?assertEqual("FFFFFFFF", bin2hex(<<255,255,255,255>>))
     ].
 
+-spec prop_bin2hex_inverse() -> any().
+prop_bin2hex_inverse() ->
+    ?FORALL(X, binary(),
+        hex2bin(bin2hex(X)) =:= X).
+
 -spec ripemd160_simple_test() -> any().
 ripemd160_simple_test() ->
     [
@@ -487,7 +490,5 @@ ec_delete_key_test() ->
         ?assertEqual({error, uninitialized_key}, ec_sign("Foobar", Key)),
         ?assertEqual({error, uninitialized_key}, ec_verify("Foobar", <<255>>, Key))
     end).
-
--spec test() -> any().
 
 -endif.
