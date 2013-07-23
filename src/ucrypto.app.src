@@ -1,7 +1,8 @@
-{application, ucrypto,
-    [
-        {description, "Thin Erlang wrapper for OpenSSL"},
-        {vsn, "0.1"},
-        {applications, [kernel, stdlib]}
-    ]
-}.
+{application, ucrypto, [
+    {description, "Thin Erlang wrapper for OpenSSL"},
+    {vsn, "0.1.0"},
+    {applications, [
+        kernel,
+        stdlib
+    ]}
+]}.
