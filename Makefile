@@ -1,7 +1,7 @@
 REPOSITORY = ucrypto
 APPS = crypto kernel stdlib sasl inets syntax_tools mnesia eunit release
 
-all: compile
+all: get-deps compile
 
 test: eunit
 
