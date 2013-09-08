@@ -4,5 +4,6 @@
     {applications, [
         kernel,
         stdlib
-    ]}
+    ]},
+    {registered, []}
 ]}.
